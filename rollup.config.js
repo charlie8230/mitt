@@ -3,18 +3,19 @@ import flow from 'rollup-plugin-flow';
 import fs from 'fs';
 
 const pkg = JSON.parse(fs.readFileSync('./package.json'));
+//	console.log(pkg);
 
 export default {
-	entry: 'src/index.js',
-	useStrict: false,
-	sourceMap: true,
+	input: 'src/index.js',
+	strict: false,
+	// output: {sourceMap: true},
 	plugins: [
 		flow(),
 		buble()
 	],
-	targets: [
-		{ dest: pkg.main, format: 'cjs' },
-		{ dest: pkg.module, format: 'es' },
-		{ dest: pkg['umd:main'], format: 'umd', moduleName: pkg.name }
+	output: [
+		{ file: pkg.main, format: 'cjs' },
+		{ file: pkg.module, format: 'es' },
+		{ file: pkg['umd:main'], format: 'umd', name: pkg.name }
 	]
 };
