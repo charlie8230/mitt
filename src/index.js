@@ -27,6 +27,7 @@ export default function mitt(all: EventHandlerMap) {
 		 *
 		 * @param  {String} type	Type of event to listen for, or `"*"` for all events
 		 * @param  {Function} handler Function to call in response to given event
+		 * @param {Number} priority determine which event fires first when there are multiple subscribers (could all be equal too)
 		 * @memberOf mitt
 		 */
 		on(type: string, handler: EventHandler, priority:Number =0) {
@@ -62,9 +63,6 @@ export default function mitt(all: EventHandlerMap) {
 				}).forEach((handler)=>{ handler(evt, type||'')});
 			}
 			(all['*'] || []).slice().forEach((handler)=>{ handler(evt, type||'')});
-			// * have to be called always not just the type
-			// (all[type] || []).slice().map((handler) => { handler(evt); });
-			// (all['*'] || []).slice().map((handler) => { handler(type, evt); });
 		}
 	};
 }
