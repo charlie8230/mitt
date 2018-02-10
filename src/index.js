@@ -1,15 +1,16 @@
 // @flow
 // An event handler can take an optional event argument
 // and should not return a value
-type EventHandler = (event?: any) => void;
-type WildCardEventHandler = (type: string, event?: any) => void
+type EventHandler = (event?: any, type: string) => void;
+//	type WildCardEventHandler = (type: string, event?: any) => void;
+type EventHandlerItem = {handler: EventHandler, priority: Number};
+//	type EventHandlerItemWild = {handler: WildCardEventHandler, priority: Number};
 
 // An array of all currently registered event handlers for a type
-type EventHandlerList = Array<EventHandler>;
-type WildCardEventHandlerList = Array<WildCardEventHandler>;
+type EventHandlerList = Array<EventHandlerItem>;
+//	type WildCardEventHandlerList = Array<EventHandlerItemWild>;
 // A map of event types and their corresponding event handlers.
 type EventHandlerMap = {
-  '*'?: WildCardEventHandlerList,
   [type: string]: EventHandlerList,
 };
 
@@ -18,7 +19,7 @@ type EventHandlerMap = {
  *  @returns {Mitt}
  */
 export default function mitt(all: EventHandlerMap) {
-	all = all || Object.create(null);
+	all = all || {};
 
 	return {
 		/**
@@ -26,10 +27,12 @@ export default function mitt(all: EventHandlerMap) {
 		 *
 		 * @param  {String} type	Type of event to listen for, or `"*"` for all events
 		 * @param  {Function} handler Function to call in response to given event
+		 * @param {Number} priority determine which event fires first when there are multiple subscribers (could all be equal too)
 		 * @memberOf mitt
 		 */
-		on(type: string, handler: EventHandler) {
-			(all[type] || (all[type] = [])).push(handler);
+		on(type: string, handler: EventHandler, priority:Number =0) {
+			if (type === '*') priority = -1;
+			(all[type] || (all[type] = [])).push({handler, priority});
 		},
 
 		/**
@@ -54,8 +57,12 @@ export default function mitt(all: EventHandlerMap) {
 		 * @memberOf mitt
 		 */
 		emit(type: string, evt: any) {
-			(all[type] || []).slice().map((handler) => { handler(evt); });
-			(all['*'] || []).slice().map((handler) => { handler(type, evt); });
+			if(type!=='*') {
+				(all[type] || []).slice().sort(a,b=>{
+					return a.priority - b.priority;
+				}).forEach((handler)=>{ handler(evt, type||'')});
+			}
+			(all['*'] || []).slice().forEach((handler)=>{ handler(evt, type||'')});
 		}
 	};
 }
