@@ -51,16 +51,15 @@ describe('mitt#', () => {
 		});
 
 		it('should NOT normalize case', () => {
-			let foo = () => {};
 			inst.on('FOO', foo);
 			inst.on('Bar', foo);
 			inst.on('baz:baT!', foo);
 
-			expect(events).to.have.property('FOO').that.deep.equals([foo]);
+			expect(events['FOO'][0].handler).to.deep.equal(foo);
 			expect(events).to.not.have.property('foo');
-			expect(events).to.have.property('Bar').that.deep.equals([foo]);
+			expect(events).to.have.property('Bar');
 			expect(events).to.not.have.property('bar');
-			expect(events).to.have.property('baz:baT!').that.deep.equals([foo]);
+			expect(events).to.have.property('baz:baT!');
 		});
 	});
 
@@ -109,7 +108,7 @@ describe('mitt#', () => {
 
 			inst.on('foo', (one, two) => {
 				expect(one).to.deep.equal(event);
-				expect(two).to.be.an('undefined');
+				expect(two).to.equal('foo');
 			});
 
 			inst.emit('foo', event);
@@ -118,8 +117,8 @@ describe('mitt#', () => {
 		it('should NOT ignore case', () => {
 			let onFoo = spy(),
 				onFOO = spy();
-			events.Foo = [onFoo];
-			events.FOO = [onFOO];
+			inst.on('Foo', onFoo);
+			inst.on('FOO', onFOO);
 
 			inst.emit('Foo', 'Foo arg');
 			inst.emit('FOO', 'FOO arg');
@@ -133,14 +132,14 @@ describe('mitt#', () => {
 				ea = { a: 'a' },
 				eb = { b: 'b' };
 
-			events['*'] = [star];
+			inst.on('*',star);
 
 			inst.emit('foo', ea);
-			expect(star).to.have.been.calledOnce.and.calledWith('foo', ea);
+			expect(star).to.have.been.calledOnce.and.calledWith(ea, 'foo');
 			star.reset();
 
 			inst.emit('bar', eb);
-			expect(star).to.have.been.calledOnce.and.calledWith('bar', eb);
+			expect(star).to.have.been.calledOnce.and.calledWith(eb, 'bar');
 		});
 	});
 });
