@@ -3,7 +3,7 @@
 // and should not return a value
 type EventHandler = (event?: any, type: string) => void;
 //	type WildCardEventHandler = (type: string, event?: any) => void;
-type EventHandlerItem = {handler: EventHandler, priority: Number};
+type EventHandlerItem = {handler: EventHandler, priority: number};
 //	type EventHandlerItemWild = {handler: WildCardEventHandler, priority: Number};
 
 // An array of all currently registered event handlers for a type
@@ -30,9 +30,10 @@ export default function mitt(all: EventHandlerMap) {
 		 * @param {Number} priority determine which event fires first when there are multiple subscribers (could all be equal too)
 		 * @memberOf mitt
 		 */
-		on(type: string, handler: EventHandler, priority:Number =0) {
+		on(type: string, handler: EventHandler, priority:number = 0) {
 			if (type === '*') priority = -1;
-			(all[type] || (all[type] = [])).push({handler, priority});
+			let item: EventHandlerItem = {handler, priority};
+			(all[type] || (all[type] = [])).push(item);
 		},
 
 		/**
@@ -44,7 +45,7 @@ export default function mitt(all: EventHandlerMap) {
 		 */
 		off(type: string, handler: EventHandler) {
 			if (all[type]) {
-				all[type].splice(all[type].indexOf(handler) >>> 0, 1);
+				all[type].splice(all[type].map(item=>item.handler).indexOf(handler) >>> 0, 1);
 			}
 		},
 
@@ -58,11 +59,11 @@ export default function mitt(all: EventHandlerMap) {
 		 */
 		emit(type: string, evt: any) {
 			if(type!=='*') {
-				(all[type] || []).slice().sort(a,b=>{
+				(all[type] || []).slice().sort((a,b)=>{
 					return a.priority - b.priority;
-				}).forEach((handler)=>{ handler(evt, type||'')});
+				}).forEach((item)=>{ item.handler(evt, type||'');});
 			}
-			(all['*'] || []).slice().forEach((handler)=>{ handler(evt, type||'')});
+			(all['*'] || []).slice().forEach((item)=>{ item.handler(evt, type||'');});
 		}
 	};
 }
