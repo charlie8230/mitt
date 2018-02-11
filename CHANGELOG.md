@@ -1,5 +1,10 @@
 # Change Log
 
+## Forked from 
+https://github.com/developit/mitt
+The reason for the fork is the minor but potentially breaking change of making the parameter lists different 
+
+
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 <a name="1.1.3"></a>
