@@ -9,7 +9,7 @@ it('should default export be a function', () => {
 });
 
 describe('mitt#', () => {
-	let events, inst;
+	let events, inst, bar =()=>{}, foo = ()=>{};
 
 	beforeEach( () => {
 		events = Object.create(null);
@@ -24,26 +24,30 @@ describe('mitt#', () => {
 		});
 
 		it('should register handler for new type', () => {
-			let foo = () => {};
+
 			inst.on('foo', foo);
 
-			expect(events).to.have.property('foo').that.deep.equals([foo]);
+			expect(events).to.have.property('foo');
+		});
+
+		it('should register handler', () => {
+			inst.on('foo', foo);
+			let evt = events['foo'];
+			expect(evt[0]).to.have.property('handler').that.deep.equals(foo);
 		});
 
 		it('should register handlers for any type strings', () => {
-			let foo = () => {};
 			inst.on('constructor', foo);
-
-			expect(events).to.have.property('constructor').that.deep.equals([foo]);
+			let evt = events['constructor'];
+			expect(evt[0]).to.have.property('handler').that.deep.equals(foo);
 		});
 
 		it('should append handler for existing type', () => {
-			let foo = () => {};
-			let bar = () => {};
+
 			inst.on('foo', foo);
 			inst.on('foo', bar);
-
-			expect(events).to.have.property('foo').that.deep.equals([foo, bar]);
+			let evts = events['foo'].map(e=>e.handler);
+			expect(evts).to.deep.equals([foo, bar]);
 		});
 
 		it('should NOT normalize case', () => {
